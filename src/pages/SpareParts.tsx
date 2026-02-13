@@ -15,6 +15,8 @@ import SparePartFormModal from '@/components/spare-parts/SparePartFormModal';
 import SparePartViewModal from '@/components/spare-parts/SparePartViewModal';
 import DeleteSparePartDialog from '@/components/spare-parts/DeleteSparePartDialog';
 import InventoryAlert from '@/components/spare-parts/InventoryAlert';
+import UpdateStockModal from '@/components/spare-parts/UpdateStockModal';
+import ReorderModal from '@/components/spare-parts/ReorderModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -45,6 +47,10 @@ export default function SpareParts() {
   const [isEditing, setIsEditing] = useState(false);
   const [showAlert, setShowAlert] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
+  const [stockModalOpen, setStockModalOpen] = useState(false);
+  const [reorderModalOpen, setReorderModalOpen] = useState(false);
+  const [stockPart, setStockPart] = useState<SparePart | null>(null);
+  const [reorderPart, setReorderPart] = useState<SparePart | null>(null);
 
   const filteredParts = parts?.filter((part) => {
     const query = searchQuery.toLowerCase();
@@ -111,6 +117,16 @@ export default function SpareParts() {
     } finally {
       setIsExporting(false);
     }
+  };
+
+  const handleUpdateStock = (part: SparePart) => {
+    setStockPart(part);
+    setStockModalOpen(true);
+  };
+
+  const handleReorder = (part: SparePart) => {
+    setReorderPart(part);
+    setReorderModalOpen(true);
   };
 
   return (
@@ -269,6 +285,8 @@ export default function SpareParts() {
             onView={handleView}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onUpdateStock={handleUpdateStock}
+            onReorder={handleReorder}
           />
         )}
 
@@ -293,6 +311,18 @@ export default function SpareParts() {
           part={selectedPart}
           onConfirm={handleConfirmDelete}
           isLoading={deletePart.isPending}
+        />
+
+        <UpdateStockModal
+          open={stockModalOpen}
+          onOpenChange={setStockModalOpen}
+          part={stockPart}
+        />
+
+        <ReorderModal
+          open={reorderModalOpen}
+          onOpenChange={setReorderModalOpen}
+          part={reorderPart}
         />
       </main>
     </div>

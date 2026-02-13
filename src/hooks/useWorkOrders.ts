@@ -181,6 +181,33 @@ export function useUpdateWorkOrder() {
   });
 }
 
+// Silent update for drag operations - no refetch, no toast
+export function useUpdateWorkOrderSilent() {
+  const { handleRLSError } = useRBAC();
+
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: WorkOrderUpdate & { id: string }) => {
+      const updateData = { ...updates };
+      if (updates.status === 'Completed' && !updates.completed_at) {
+        updateData.completed_at = new Date().toISOString();
+      }
+
+      const { data, error } = await (supabase
+        .from('work_orders' as 'assets')
+        .update(updateData as never)
+        .eq('id', id)
+        .select()
+        .single() as unknown as Promise<{ data: WorkOrder | null; error: Error | null }>);
+
+      if (error) throw error;
+      return data;
+    },
+    onError: (error: Error) => {
+      console.error('Failed to update work order:', handleRLSError(error));
+    },
+  });
+}
+
 export function useDeleteWorkOrder() {
   const queryClient = useQueryClient();
   const { isAuthenticated, handleRLSError } = useRBAC();

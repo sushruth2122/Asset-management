@@ -16,7 +16,6 @@ import {
   Database,
   Wrench,
   BarChart3,
-  Moon,
   LogOut,
   User,
   MapPin,
@@ -24,6 +23,7 @@ import {
   Activity,
 } from 'lucide-react';
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function TopNav() {
   const { user, role, signOut } = useAuth();
@@ -77,9 +77,7 @@ export default function TopNav() {
         <div className="flex items-center gap-3">
           <NotificationDropdown />
 
-          <Button variant="ghost" size="icon">
-            <Moon className="h-5 w-5" />
-          </Button>
+          <ThemeToggle />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

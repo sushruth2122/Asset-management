@@ -10,16 +10,18 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Eye, Pencil, Trash2, ArrowUpDown, RefreshCw } from 'lucide-react';
+import { Eye, Pencil, Trash2, ArrowUpDown, Package, ShoppingCart } from 'lucide-react';
 
 interface SparePartsTableProps {
   parts: SparePart[];
   onView: (part: SparePart) => void;
   onEdit: (part: SparePart) => void;
   onDelete: (part: SparePart) => void;
+  onUpdateStock: (part: SparePart) => void;
+  onReorder: (part: SparePart) => void;
 }
 
-export default function SparePartsTable({ parts, onView, onEdit, onDelete }: SparePartsTableProps) {
+export default function SparePartsTable({ parts, onView, onEdit, onDelete, onUpdateStock, onReorder }: SparePartsTableProps) {
 
   const getStockStatus = (part: SparePart) => {
     if (part.quantity === 0) return 'Out of Stock';
@@ -106,7 +108,13 @@ export default function SparePartsTable({ parts, onView, onEdit, onDelete }: Spa
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-foreground">{part.quantity}</span>
-                      <span className="text-xs text-muted-foreground">Min: {part.minimum_threshold}</span>
+                      <span className="text-xs text-muted-foreground">/ {part.minimum_threshold}</span>
+                      {part.quantity === 0 && (
+                        <Badge variant="destructive" className="text-[10px] px-1.5 py-0">Critical</Badge>
+                      )}
+                      {part.quantity > 0 && part.quantity <= part.minimum_threshold && (
+                        <Badge variant="outline" className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px] px-1.5 py-0">Low</Badge>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -118,6 +126,26 @@ export default function SparePartsTable({ parts, onView, onEdit, onDelete }: Spa
                   <TableCell className="text-muted-foreground">{part.storage_location || '-'}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        title="Update Stock"
+                        onClick={() => onUpdateStock(part)}
+                      >
+                        <Package className="h-4 w-4" />
+                      </Button>
+                      {part.quantity <= part.minimum_threshold && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-amber-400"
+                          title="Reorder"
+                          onClick={() => onReorder(part)}
+                        >
+                          <ShoppingCart className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -141,9 +169,6 @@ export default function SparePartsTable({ parts, onView, onEdit, onDelete }: Spa
                         onClick={() => onDelete(part)}
                       >
                         <Trash2 className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <RefreshCw className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>

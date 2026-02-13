@@ -528,6 +528,8 @@ export default function AssetFormModal({
                             <SelectItem value="Active">Active</SelectItem>
                             <SelectItem value="Inactive">Inactive</SelectItem>
                             <SelectItem value="Maintenance">Maintenance</SelectItem>
+                            <SelectItem value="Retired">Retired</SelectItem>
+                            <SelectItem value="Disposed">Disposed</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

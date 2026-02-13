@@ -3,6 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useRBAC } from './useRBAC';
 
+export type LifecycleStage = 'planning' | 'active' | 'maintenance' | 'inactive' | 'retired' | 'disposed';
+
+export const ACTIVE_STAGES: LifecycleStage[] = ['active', 'maintenance'];
+export const NON_ACTIVE_STAGES: LifecycleStage[] = ['inactive', 'retired', 'disposed'];
+
 export interface Asset {
   id: string;
   asset_name: string;
@@ -33,25 +38,46 @@ export interface Asset {
   longitude: number | null;
   health_status: string | null;
   risk_level: string | null;
+  // Lifecycle
+  lifecycle_stage: LifecycleStage;
+  // Financial (v2)
+  purchase_price: number | null;
+  acquisition_date: string | null;
+  useful_life_years: number | null;
+  depreciation_rate: number | null;
+  salvage_value: number | null;
 }
 
-export type AssetInsert = Omit<Asset, 'id' | 'created_at' | 'updated_at' | 'latitude' | 'longitude' | 'health_status' | 'risk_level'> & {
+export type AssetInsert = Omit<Asset, 'id' | 'created_at' | 'updated_at' | 'latitude' | 'longitude' | 'health_status' | 'risk_level' | 'lifecycle_stage' | 'purchase_price' | 'acquisition_date' | 'useful_life_years' | 'depreciation_rate' | 'salvage_value'> & {
   latitude?: number | null;
   longitude?: number | null;
   health_status?: string | null;
   risk_level?: string | null;
+  lifecycle_stage?: LifecycleStage;
+  purchase_price?: number | null;
+  acquisition_date?: string | null;
+  useful_life_years?: number | null;
+  depreciation_rate?: number | null;
+  salvage_value?: number | null;
 };
 export type AssetUpdate = Partial<AssetInsert>;
 
-export function useAssets() {
+export function useAssets(lifecycleFilter?: 'active' | 'non-active' | 'all') {
   return useQuery({
-    queryKey: ['assets'],
+    queryKey: ['assets', lifecycleFilter ?? 'all'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('assets')
         .select('*')
         .order('created_at', { ascending: false });
 
+      if (lifecycleFilter === 'active') {
+        query = query.in('lifecycle_stage', ACTIVE_STAGES);
+      } else if (lifecycleFilter === 'non-active') {
+        query = query.in('lifecycle_stage', NON_ACTIVE_STAGES);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data as Asset[];
     },

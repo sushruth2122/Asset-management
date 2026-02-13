@@ -20,6 +20,13 @@
   </head>
 
   <body>
+    <script>
+      (function(){
+        var t=localStorage.getItem('astrikos-theme');
+        var d=t==='light'?'light':t==='dark'?'dark':(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+        document.documentElement.classList.add(d);
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

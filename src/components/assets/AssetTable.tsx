@@ -1,3 +1,4 @@
+import React, { memo, useCallback } from 'react';
 import { Asset } from '@/hooks/useAssets';
 import {
   Table,
@@ -17,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Eye, Pencil, Trash2, MoreHorizontal, ArrowUpDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface AssetTableProps {
   assets: Asset[];
@@ -26,6 +28,7 @@ interface AssetTableProps {
 }
 
 export default function AssetTable({ assets, onView, onEdit, onDelete }: AssetTableProps) {
+  const navigate = useNavigate();
 
   const getStatusVariant = (status: string) => {
     switch (status.toLowerCase()) {
@@ -48,6 +51,10 @@ export default function AssetTable({ assets, onView, onEdit, onDelete }: AssetTa
         return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
       case 'inactive':
         return 'bg-slate-500/20 text-slate-400 border-slate-500/30';
+      case 'retired':
+        return 'bg-violet-500/20 text-violet-400 border-violet-500/30';
+      case 'disposed':
+        return 'bg-red-500/20 text-red-400 border-red-500/30';
       default:
         return '';
     }
@@ -103,7 +110,11 @@ export default function AssetTable({ assets, onView, onEdit, onDelete }: AssetTa
             </TableRow>
           ) : (
             assets.map((asset) => (
-              <TableRow key={asset.id} className="group">
+              <TableRow
+                key={asset.id}
+                className="group cursor-pointer hover:bg-muted/50"
+                onClick={() => navigate(`/assets/${asset.id}`)}
+              >
                 <TableCell>
                   <Checkbox />
                 </TableCell>
@@ -132,7 +143,7 @@ export default function AssetTable({ assets, onView, onEdit, onDelete }: AssetTa
                     {asset.status}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
                     <Button
                       variant="ghost"
