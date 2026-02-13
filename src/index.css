@@ -1,0 +1,177 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Asset Management System - Dark Enterprise Theme */
+
+@layer base {
+  :root {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 187 92% 45%;
+    --primary-foreground: 222 47% 6%;
+
+    --secondary: 220 30% 15%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 220 30% 15%;
+    --muted-foreground: 215 20% 55%;
+
+    --accent: 187 75% 40%;
+    --accent-foreground: 222 47% 6%;
+
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 152 70% 45%;
+    --success-foreground: 222 47% 6%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 47% 6%;
+
+    --border: 220 25% 18%;
+    --input: 220 25% 18%;
+    --ring: 187 92% 45%;
+
+    --radius: 0.75rem;
+
+    --chart-primary: 187 92% 55%;
+    --chart-secondary: 152 70% 50%;
+    --chart-accent: 280 60% 55%;
+    --chart-muted: 220 25% 35%;
+
+    --sidebar-background: 222 47% 7%;
+    --sidebar-foreground: 210 40% 90%;
+    --sidebar-primary: 187 92% 45%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 220 30% 12%;
+    --sidebar-accent-foreground: 210 40% 90%;
+    --sidebar-border: 220 25% 18%;
+    --sidebar-ring: 187 92% 45%;
+
+    /* Card glow effects */
+    --glow-primary: 187 92% 45%;
+    --glow-destructive: 0 72% 55%;
+    --glow-success: 152 70% 45%;
+  }
+
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 187 92% 45%;
+    --primary-foreground: 222 47% 6%;
+    --secondary: 220 30% 15%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 220 30% 15%;
+    --muted-foreground: 215 20% 55%;
+    --accent: 187 75% 40%;
+    --accent-foreground: 222 47% 6%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 25% 18%;
+    --input: 220 25% 18%;
+    --ring: 187 92% 45%;
+    --sidebar-background: 222 47% 7%;
+    --sidebar-foreground: 210 40% 90%;
+    --sidebar-primary: 187 92% 45%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 220 30% 12%;
+    --sidebar-accent-foreground: 210 40% 90%;
+    --sidebar-border: 220 25% 18%;
+    --sidebar-ring: 187 92% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .card-glow {
+    @apply relative overflow-hidden;
+  }
+
+  .card-glow::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, hsl(var(--border)) 0%, transparent 50%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .card-alert-critical {
+    @apply relative overflow-hidden border-destructive/50;
+    box-shadow: 0 0 30px -5px hsl(var(--destructive) / 0.3);
+  }
+
+  .card-alert-warning {
+    @apply relative overflow-hidden border-warning/50;
+    box-shadow: 0 0 30px -5px hsl(var(--warning) / 0.3);
+  }
+
+  .metric-change-positive {
+    @apply text-success;
+  }
+
+  .metric-change-negative {
+    @apply text-destructive;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-2 px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all duration-200;
+  }
+
+  .nav-item-active {
+    @apply bg-secondary text-foreground;
+  }
+
+  .dashboard-tab {
+    @apply px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200;
+  }
+
+  .dashboard-tab-active {
+    @apply bg-secondary text-foreground;
+  }
+
+  .dashboard-tab-inactive {
+    @apply text-muted-foreground hover:text-foreground hover:bg-secondary/50;
+  }
+}
+
+@layer utilities {
+  .glass-effect {
+    backdrop-filter: blur(12px);
+    background: hsl(var(--card) / 0.8);
+  }
+
+  .text-gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
