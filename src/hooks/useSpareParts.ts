@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useRBAC } from './useRBAC';
 
+export type StockStatus = 'critical' | 'low' | 'healthy';
+
 export interface SparePart {
   id: string;
   part_name: string;
@@ -19,6 +21,7 @@ export interface SparePart {
   status: string;
   created_at: string;
   updated_at: string;
+  stock_status: StockStatus;
   asset?: {
     id: string;
     asset_name: string;
@@ -28,6 +31,12 @@ export interface SparePart {
 
 export type SparePartInsert = Omit<SparePart, 'id' | 'created_at' | 'updated_at' | 'asset'>;
 export type SparePartUpdate = Partial<SparePartInsert>;
+
+function computeStockStatus(quantity: number, threshold: number): StockStatus {
+  if (quantity === 0) return 'critical';
+  if (quantity <= threshold) return 'low';
+  return 'healthy';
+}
 
 export function useSpareParts() {
   return useQuery({
@@ -42,7 +51,11 @@ export function useSpareParts() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as SparePart[];
+
+      return (data as (Omit<SparePart, 'stock_status'>)[]).map((p) => ({
+        ...p,
+        stock_status: computeStockStatus(p.quantity, p.minimum_threshold),
+      })) as SparePart[];
     },
   });
 }

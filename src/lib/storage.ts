@@ -9,6 +9,7 @@ export type DocFolder = 'insurance' | 'warranty' | 'documents';
 export interface UploadResult {
   storagePath: string;
   size: number;
+  documentName: string;
 }
 
 function validatePdf(file: File): string | null {
@@ -44,7 +45,7 @@ export async function uploadProtectionDoc(
   if (signal?.aborted) throw new DOMException('Upload aborted', 'AbortError');
   if (error) throw error;
 
-  return { storagePath, size: file.size };
+  return { storagePath, size: file.size, documentName: file.name };
 }
 
 /**
@@ -80,3 +81,7 @@ export async function deleteProtectionDoc(storagePath: string): Promise<void> {
 }
 
 export { validatePdf, MAX_FILE_SIZE };
+
+// Re-export dedicated helpers
+export { uploadPdf, type PdfFolder, type PdfUploadResult } from './storage/uploadPdf';
+export { getSignedPdf, deletePdf } from './storage/getSignedPdf';

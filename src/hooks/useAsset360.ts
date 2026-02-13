@@ -41,6 +41,8 @@ export interface AssetInsurance {
   is_active: boolean;
   document_url: string | null;
   storage_path: string | null;
+  document_name: string | null;
+  uploaded_at: string | null;
   reminder_enabled: boolean;
   notes: string | null;
   created_at: string;
@@ -57,6 +59,7 @@ export interface AssetWarranty {
   terms: string | null;
   document_url: string | null;
   storage_path: string | null;
+  document_name: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;

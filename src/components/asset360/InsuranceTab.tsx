@@ -27,6 +27,8 @@ function InsuranceTab({ assetId }: Props) {
       id: policyId,
       asset_id: assetId,
       storage_path: result.storagePath,
+      document_name: result.documentName,
+      uploaded_at: new Date().toISOString(),
     });
     setUploadingPolicyId(null);
   }, [assetId, updateInsurance]);
