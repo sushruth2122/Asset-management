@@ -1,0 +1,10 @@
+project_id = "xdbtkwicufrzranokkca"
+
+[functions.export-assets]
+verify_jwt = false
+
+[functions.export-spare-parts]
+verify_jwt = false
+
+[functions.seed-admin]
+verify_jwt = false
