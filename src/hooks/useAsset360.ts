@@ -128,6 +128,25 @@ export function useCreateAssetDocument() {
   });
 }
 
+// ─── Documents by Type (used by Insurance/Warranty tabs) ───
+
+export function useAssetDocumentsByType(assetId: string | null, docType: DocumentType) {
+  return useQuery({
+    queryKey: ['asset_documents', assetId, docType],
+    queryFn: async () => {
+      const { data, error } = await (supabase
+        .from('asset_documents' as 'assets')
+        .select('*')
+        .eq('asset_id', assetId!)
+        .eq('document_type', docType)
+        .order('created_at', { ascending: false }) as unknown as Promise<{ data: AssetDocument[] | null; error: Error | null }>);
+      if (error) throw error;
+      return (data ?? []) as AssetDocument[];
+    },
+    enabled: !!assetId,
+  });
+}
+
 // ─── Insurance ───
 
 export function useAssetInsurance(assetId: string | null) {

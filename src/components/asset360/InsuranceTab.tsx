@@ -1,11 +1,12 @@
 import { memo, useState, useCallback } from 'react';
 import { format, isPast, differenceInDays } from 'date-fns';
-import { Shield, AlertTriangle, CheckCircle, Eye, Upload } from 'lucide-react';
+import { Shield, AlertTriangle, CheckCircle, Eye, Upload, FileText, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAssetInsurance, useUpdateAssetInsurance } from '@/hooks/useAsset360';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useAssetInsurance, useUpdateAssetInsurance, useAssetDocumentsByType, useDeleteAssetDocument } from '@/hooks/useAsset360';
 import FileUploader from '@/components/shared/FileUploader';
 import SignedUrlPreviewModal from '@/components/shared/SignedUrlPreviewModal';
 import type { UploadResult } from '@/lib/storage';
@@ -16,7 +17,9 @@ interface Props {
 
 function InsuranceTab({ assetId }: Props) {
   const { data: policies, isLoading } = useAssetInsurance(assetId);
+  const { data: insuranceDocs, isLoading: docsLoading } = useAssetDocumentsByType(assetId, 'insurance');
   const updateInsurance = useUpdateAssetInsurance();
+  const deleteDoc = useDeleteAssetDocument();
 
   const [previewPath, setPreviewPath] = useState<string | null>(null);
   const [previewTitle, setPreviewTitle] = useState('');
@@ -41,20 +44,17 @@ function InsuranceTab({ assetId }: Props) {
     );
   }
 
-  if (!policies?.length) {
-    return (
-      <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">
-          <Shield className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          No insurance records found.
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-2">
+      {!policies?.length ? (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            <Shield className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            No insurance records found.
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
         {policies.map((p) => {
           const expired = isPast(new Date(p.end_date));
           const daysToExpiry = differenceInDays(new Date(p.end_date), new Date());
@@ -146,6 +146,73 @@ function InsuranceTab({ assetId }: Props) {
           );
         })}
       </div>
+      )}
+
+      {/* Insurance Documents from Documents Tab */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Insurance Documents ({insuranceDocs?.length ?? 0})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {docsLoading ? (
+            <div className="p-4 space-y-2">
+              {[1, 2].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
+            </div>
+          ) : !insuranceDocs?.length ? (
+            <div className="py-8 text-center text-muted-foreground text-sm">
+              No insurance documents uploaded yet. Upload from the <span className="font-medium">Documents</span> tab with type "insurance".
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Document Name</TableHead>
+                  <TableHead>Uploaded</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {insuranceDocs.map((doc) => (
+                  <TableRow key={doc.id}>
+                    <TableCell className="font-medium">{doc.document_name}</TableCell>
+                    <TableCell className="text-muted-foreground text-xs">
+                      {format(new Date(doc.created_at), 'dd MMM yyyy')}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        {doc.file_url && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => {
+                              setPreviewPath(doc.file_url!);
+                              setPreviewTitle(doc.document_name);
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive"
+                          onClick={() => deleteDoc.mutate({ id: doc.id, asset_id: assetId })}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
 
       <SignedUrlPreviewModal
         open={!!previewPath}

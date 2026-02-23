@@ -14,31 +14,31 @@ UPDATE public.assets SET lifecycle_stage = 'maintenance' WHERE status = 'Mainten
 UPDATE public.assets SET lifecycle_stage = 'inactive'    WHERE status = 'Inactive'    AND lifecycle_stage = 'active';
 
 -- Index for the new lifecycle filter (high-impact for listing queries)
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_assets_lifecycle_stage
+CREATE INDEX IF NOT EXISTS idx_assets_lifecycle_stage
   ON public.assets(lifecycle_stage);
 
 -- Composite index for the most common listing query pattern
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_assets_lifecycle_created
+CREATE INDEX IF NOT EXISTS idx_assets_lifecycle_created
   ON public.assets(lifecycle_stage, created_at DESC);
 
 -- ── GOAL 2: Performance Indexes (from prior audit) ──
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_assets_created_at_desc
+CREATE INDEX IF NOT EXISTS idx_assets_created_at_desc
   ON public.assets(created_at DESC);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_work_orders_status_created
+CREATE INDEX IF NOT EXISTS idx_work_orders_status_created
   ON public.work_orders(status, created_at DESC);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_work_orders_assigned_status
+CREATE INDEX IF NOT EXISTS idx_work_orders_assigned_status
   ON public.work_orders(assigned_to, status) WHERE assigned_to IS NOT NULL;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_notifications_user_unread
+CREATE INDEX IF NOT EXISTS idx_notifications_user_unread
   ON public.notifications(user_id, read_status) WHERE read_status = false;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_spare_parts_asset_id
+CREATE INDEX IF NOT EXISTS idx_spare_parts_asset_id
   ON public.spare_parts(asset_id);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_work_orders_asset_id
+CREATE INDEX IF NOT EXISTS idx_work_orders_asset_id
   ON public.work_orders(asset_id);
 
 -- ── GOAL 4: Satellite Tables ──
@@ -105,19 +105,19 @@ CREATE TABLE IF NOT EXISTS public.asset_lifecycle_events (
 
 -- ── Satellite Indexes ──
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_asset_documents_asset_id
+CREATE INDEX IF NOT EXISTS idx_asset_documents_asset_id
   ON public.asset_documents(asset_id);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_asset_insurance_asset_id
+CREATE INDEX IF NOT EXISTS idx_asset_insurance_asset_id
   ON public.asset_insurance(asset_id);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_asset_financials_asset_id
+CREATE INDEX IF NOT EXISTS idx_asset_financials_asset_id
   ON public.asset_financials(asset_id);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_asset_lifecycle_events_asset_id
+CREATE INDEX IF NOT EXISTS idx_asset_lifecycle_events_asset_id
   ON public.asset_lifecycle_events(asset_id);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_asset_lifecycle_events_type
+CREATE INDEX IF NOT EXISTS idx_asset_lifecycle_events_type
   ON public.asset_lifecycle_events(asset_id, event_type);
 
 -- ── RLS ──

@@ -13,7 +13,7 @@ ALTER TABLE public.assets ADD COLUMN IF NOT EXISTS salvage_value NUMERIC(15, 2);
 UPDATE public.assets SET purchase_price = purchase_value WHERE purchase_price IS NULL;
 UPDATE public.assets SET acquisition_date = purchase_date::date WHERE acquisition_date IS NULL AND purchase_date IS NOT NULL;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_assets_acquisition_date
+CREATE INDEX IF NOT EXISTS idx_assets_acquisition_date
   ON public.assets(acquisition_date);
 
 -- ── 2. Insurance — add document_url and reminder_enabled ──
@@ -33,7 +33,7 @@ ALTER TABLE public.asset_lifecycle_events ADD CONSTRAINT asset_lifecycle_events_
   ));
 
 -- Composite index for timeline ordering
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_lifecycle_events_asset_performed
+CREATE INDEX IF NOT EXISTS idx_lifecycle_events_asset_performed
   ON public.asset_lifecycle_events(asset_id, event_date DESC);
 
 -- ── 4. Documents — add 'name' alias column for clarity ──

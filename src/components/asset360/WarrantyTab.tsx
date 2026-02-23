@@ -1,10 +1,11 @@
 import { memo, useState, useCallback } from 'react';
 import { format, isPast, differenceInDays } from 'date-fns';
-import { ShieldCheck, AlertTriangle, CheckCircle, Eye, Upload, Plus } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, CheckCircle, Eye, Upload, Plus, FileText, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -15,7 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useAssetWarranties, useCreateAssetWarranty, useUpdateAssetWarranty } from '@/hooks/useAsset360';
+import { useAssetWarranties, useCreateAssetWarranty, useUpdateAssetWarranty, useAssetDocumentsByType, useDeleteAssetDocument } from '@/hooks/useAsset360';
 import FileUploader from '@/components/shared/FileUploader';
 import SignedUrlPreviewModal from '@/components/shared/SignedUrlPreviewModal';
 import type { UploadResult } from '@/lib/storage';
@@ -26,8 +27,10 @@ interface Props {
 
 function WarrantyTab({ assetId }: Props) {
   const { data: warranties, isLoading } = useAssetWarranties(assetId);
+  const { data: warrantyDocs, isLoading: docsLoading } = useAssetDocumentsByType(assetId, 'warranty');
   const createWarranty = useCreateAssetWarranty();
   const updateWarranty = useUpdateAssetWarranty();
+  const deleteDoc = useDeleteAssetDocument();
 
   const [previewPath, setPreviewPath] = useState<string | null>(null);
   const [previewTitle, setPreviewTitle] = useState('');
@@ -178,6 +181,72 @@ function WarrantyTab({ assetId }: Props) {
           })}
         </div>
       )}
+
+      {/* Warranty Documents from Documents Tab */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Warranty Documents ({warrantyDocs?.length ?? 0})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {docsLoading ? (
+            <div className="p-4 space-y-2">
+              {[1, 2].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
+            </div>
+          ) : !warrantyDocs?.length ? (
+            <div className="py-8 text-center text-muted-foreground text-sm">
+              No warranty documents uploaded yet. Upload from the <span className="font-medium">Documents</span> tab with type "warranty".
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Document Name</TableHead>
+                  <TableHead>Uploaded</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {warrantyDocs.map((doc) => (
+                  <TableRow key={doc.id}>
+                    <TableCell className="font-medium">{doc.document_name}</TableCell>
+                    <TableCell className="text-muted-foreground text-xs">
+                      {format(new Date(doc.created_at), 'dd MMM yyyy')}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        {doc.file_url && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => {
+                              setPreviewPath(doc.file_url!);
+                              setPreviewTitle(doc.document_name);
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive"
+                          onClick={() => deleteDoc.mutate({ id: doc.id, asset_id: assetId })}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Add Warranty Dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
